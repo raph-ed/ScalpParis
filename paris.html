@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paris Commercial Market Intelligence</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">PARIS MARKET INTELLIGENCE</div>
+        <div class="subtitle">Analyse d'implantation & rentabilite sectorielle par bilans reels</div>
+    </header>
+
+    <main class="container">
+        <section class="search-panel">
+            <div class="input-group">
+                <label for="code_postal">Arrondissement / Quartier</label>
+                <select id="code_postal">
+                    <option value="75001">Paris 1er - Palais-Royal / Louvre</option>
+                    <option value="75002">Paris 2e - Bourse / Sentier</option>
+                    <option value="75003">Paris 3e - Temple / Arts-et-Metiers</option>
+                    <option value="75004">Paris 4e - Marais / Hotel-de-Ville</option>
+                    <option value="75009">Paris 9e - Opera / Grands Boulevards</option>
+                    <option value="75010">Paris 10e - Canal St-Martin / Republique</option>
+                    <option value="75011">Paris 11e - Bastille / Oberkampf</option>
+                    <option value="75018">Paris 18e - Montmartre / Goutte d'Or</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="secteur">Secteur d'activite</label>
+                <select id="secteur">
+                    <option value="coffee_shop">Coffee Shop / Salon de the</option>
+                    <option value="restauration">Restauration Traditionnelle</option>
+                    <option value="boulangerie">Boulangerie / Viennoiserie</option>
+                    <option value="textile">Pret-a-porter / Textile</option>
+                    <option value="epicerie">Epicerie Fine / Alimentation</option>
+                    <option value="coiffure_beaute">Coiffure & Soins Esthetiques</option>
+                    <option value="librairie">Librairie & Papeterie</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button id="btn-rechercher" class="btn-primary">Lancer l'extraction</button>
+                <button id="btn-exporter" class="btn-secondary" disabled>Exporter la synthese (CSV)</button>
+            </div>
+        </section>
+
+        <section id="results-area" class="results-area hidden">
+            <!-- Statistiques de Synthese -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-label">Rendement Moyen</span>
+                    <span id="kpi-marge" class="kpi-value">-</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Chiffre d'Affaires Moyen</span>
+                    <span id="kpi-ca" class="kpi-value">-</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Etablissements Recenses</span>
+                    <span id="kpi-count" class="kpi-value">-</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-label">Score d'Opportunite Implantation</span>
+                    <span id="kpi-score" class="kpi-value">-</span>
+                </div>
+            </div>
+
+            <!-- Cartographie avec Legende Tri-Zone -->
+            <div class="map-wrapper">
+                <div class="map-legend">
+                    <span class="legend-item"><span class="dot red"></span> Rouge : Forte affluence / Tres demande</span>
+                    <span class="legend-item"><span class="dot orange"></span> Orange : Passage regulier / Intermediaire</span>
+                    <span class="legend-item"><span class="dot green"></span> Vert : Calme / Clienteles regulieres</span>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <!-- Produits Phares / NLP -->
+            <div class="section-block">
+                <h3>Produits Phares & Best-Sellers du Secteur</h3>
+                <div id="products-container" class="products-grid"></div>
+            </div>
+
+            <!-- Palmares Rentabilite -->
+            <div class="tables-grid">
+                <div class="table-container">
+                    <h3>Top 5 - Commerces les Plus Rentables</h3>
+                    <table id="table-plus-rentables">
+                        <thead>
+                            <tr>
+                                <th>Raison Sociale</th>
+                                <th>Marge</th>
+                                <th>CA Declare</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="table-container">
+                    <h3>Top 5 - Commerces les Moins Rentables</h3>
+                    <table id="table-moins-rentables">
+                        <thead>
+                            <tr>
+                                <th>Raison Sociale</th>
+                                <th>Marge</th>
+                                <th>CA Declare</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Widget Avis Discret en Bas a Droite -->
+    <div class="feedback-widget">
+        <button id="feedback-toggle" class="feedback-btn">Avis & Suggestions</button>
+        <div id="feedback-popover" class="feedback-popover hidden">
+            <div class="feedback-header">
+                <h4>Evaluation Plateforme</h4>
+                <button id="feedback-close" class="close-btn">&times;</button>
+            </div>
+            <form id="form-feedback">
+                <label for="feedback-note">Note d'evaluation (/10)</label>
+                <input type="number" id="feedback-note" min="1" max="10" required placeholder="Ex. 9">
+
+                <label for="feedback-comm">Commentaire d'amelioration</label>
+                <textarea id="feedback-comm" rows="3" required placeholder="Axes d'optimisation..."></textarea>
+
+                <button type="submit" class="btn-primary full">Soumettre</button>
+            </form>
+            <div class="feedback-links">
+                <a href="#" id="link-view-feedbacks">Consulter les retours enregistres</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Visionneuse Retours Data -->
+    <div id="modal-feedbacks" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Retours Utilisateurs Enregistres (Table SQL)</h3>
+                <button id="modal-close" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-actions">
+                <a href="/api/feedback/csv" class="btn-secondary">Telecharger les retours (CSV)</a>
+            </div>
+            <table id="table-feedbacks">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Avis (Note)</th>
+                        <th>Commentaire</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
